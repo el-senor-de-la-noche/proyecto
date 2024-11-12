@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedOne - Registro</title>
+    <link rel="stylesheet" href="styles2.css">
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-analytics.js"></script>
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyDUNEGX8OgAf9KCZ-XLxQEf1dy6z-s-8vo",
+            authDomain: "redone-aa1ae.firebaseapp.com",
+            projectId: "redone-aa1ae",
+            storageBucket: "redone-aa1ae.appspot.com",
+            messagingSenderId: "955048468262",
+            appId: "1:955048468262:web:c91f0bec5c6d79ef616be7",
+            measurementId: "G-2ZBVT43NDT"
+        };
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+        var db = firebase.firestore();
+    </script>
+    <style>
+        body {
+            background: url('https://example.com/entertaining-background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4267b2;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #365899;
+        }
+
+        p {
+            margin-top: 20px;
+            color: #555;
+        }
+
+        p a {
+            color: #4267b2;
+            text-decoration: none;
+        }
+
+        p a:hover {
+            text-decoration: underline;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Registro</h1>
+        <form id="register-form">
+            <div class="input-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+            </div>
+            <div class="input-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="input-group">
+                <label for="age">Age:</label>
+                <input type="text" id="age">
+            </div>
+            <div class="input-group">
+                <label for="gender">Gender:</label>
+                <input type="text" id="gender">
+            </div>
+            <div class="input-group">
+                <label for="origin">Origin:</label>
+                <input type="text" id="origin">
+            </div>
+            <button type="submit">Register</button>
+        </form>
+        <p>¿Ya tienes una cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+        <div id="error-message"></div>
+    </div>
+    <script>
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            var username = document.getElementById('username').value;
+            var age = document.getElementById('age').value;
+            var gender = document.getElementById('gender').value;
+            var origin = document.getElementById('origin').value;
+
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    var user = userCredential.user;
+                    return user.sendEmailVerification() // Enviar correo de verificación
+                        .then(() => {
+                            return db.collection('users').doc(user.uid).set({
+                                email: email,
+                                username: username,
+                                age: age,
+                                gender: gender,
+                                origin: origin
+                            });
+                        });
+                })
+                .then(() => {
+                    console.log('Usuario registrado, datos guardados en Firestore, y email de verificación enviado');
+                    window.location.href = 'login.html';
+                })
+                .catch((error) => {
+                    var errorCode = error.code;
+                    var errorMessage = error.message;
+                    document.getElementById('error-message').textContent = errorMessage;
+                    console.error('Error al registrar:', errorCode, errorMessage);
+                });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzTalk - Foro</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById('message').addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    addMessage();
+                }
+            });
+        });
+
+        function addMessage() {
+            const user = document.getElementById('username').value;
+            const age = document.getElementById('age').value;
+            const city = document.getElementById('city').value;
+            const interests = document.getElementById('interests').value;
+            const gender = document.querySelector('input[name="gender"]:checked')?.value || 'No prefiero decirlo';
+            const message = document.getElementById('message').value;
+
+            if (user && message) {
+                const messageBoard = document.getElementById('message-board');
+                const now = new Date();
+                const time = now.toLocaleTimeString();
+                const newMessage = document.createElement('div');
+                newMessage.classList.add('message');
+                newMessage.innerHTML = `
+                    <div class="user-info">
+                        <strong>${user}</strong> (${age}, ${city}, ${interests}, ${gender})
+                    </div>
+                    <div class="message-content">
+                        <p>${message}</p>
+                        <small>${time}</small>
+                    </div>
+                `;
+                messageBoard.appendChild(newMessage);
+                document.getElementById('message').value = '';
+                messageBoard.scrollTop = messageBoard.scrollHeight; // Scroll to bottom
+            } else {
+                alert('Por favor, completa todos los campos antes de enviar el mensaje.');
+            }
+        }
+
+        function addMedia() {
+            const fileInput = document.getElementById('media');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const messageBoard = document.getElementById('message-board');
+                    const newMessage = document.createElement('div');
+                    newMessage.classList.add('message');
+                    newMessage.innerHTML = `
+                        <div class="user-info">
+                            <strong>Media</strong>
+                        </div>
+                        <div class="message-content">
+                            <img src="${e.target.result}" alt="Media" class="media-content">
+                        </div>
+                    `;
+                    messageBoard.appendChild(newMessage);
+                    messageBoard.scrollTop = messageBoard.scrollHeight; // Scroll to bottom
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>BuzzTalk</h1>
+        <nav>
+            <a href="index.html">Inicio</a>
+            <a href="forum.html">Foro</a>
+            <a href="games.html">Juegos</a>
+            <a href="tienda.html">Tienda</a>
+        </nav>
+    </header>
+    <main>
+        <section class="forum-container">
+            <div class="sidebar">
+                <h3>Perfil</h3>
+                <input type="text" id="username" placeholder="Tu nombre de usuario" class="input-field">
+                <input type="text" id="age" placeholder="Edad" class="input-field">
+                <input type="text" id="city" placeholder="Ciudad" class="input-field">
+                <input type="text" id="interests" placeholder="Intereses" class="input-field">
+                <div class="gender-selection">
+                    <label><input type="radio" name="gender" value="Masculino"> Masculino</label>
+                    <label><input type="radio" name="gender" value="Femenino"> Femenino</label>
+                    <label><input type="radio" name="gender" value="Otro"> Otro</label>
+                    <label><input type="radio" name="gender" value="No prefiero decirlo" checked> No prefiero decirlo</label>
+                </div>
+            </div>
+            <div class="chat-container">
+                <div id="message-board" class="message-board"></div>
+                <div class="message-form">
+                    <textarea id="message" placeholder="Escribe tu mensaje..." class="input-field"></textarea>
+                    <input type="file" id="media" class="input-field" accept="image/png, image/jpeg, video/*">
+                    <button onclick="addMessage()" class="send-button">Enviar</button>
+                    <button onclick="addMedia()" class="send-button">Enviar Media</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="container">
+            <p>© 2024 BuzzTalk. Todos los derechos reservados.</p>
+            <div class="social-media">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

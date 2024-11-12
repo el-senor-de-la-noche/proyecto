@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videojuegos para pasar el rato</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #2c003e; /* Color morado oscuro */
+            text-align: center;
+            padding: 50px;
+            color: #d4bfff; /* Color claro que combina con el fondo */
+        }
+        h1 {
+            color: #ffcc00;
+            text-shadow: 2px 2px 4px #000;
+        }
+        .game-container {
+            background-color: rgba(0, 0, 0, 0.8); /* Fondo del contenedor de los juegos */
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 0 auto;
+            border: 2px solid #ffcc00; /* Borde del contenedor */
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .game-item {
+            background-color: rgba(44, 0, 62, 0.7); /* Fondo semi-transparente que combina con el fondo principal */
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            text-decoration: none;
+            color: #d4bfff; /* Color claro que combina con el fondo */
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        .game-item:hover {
+            transform: scale(1.05);
+            background-color: rgba(128, 0, 128, 0.8); /* Color morado claro al pasar el ratón */
+        }
+        .game-item img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        .game-item p {
+            margin: 10px 0 0;
+            color: #ffcc00;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Videojuegos para pasar el rato</h1>
+    <div class="game-container">
+        <div class="game-grid">
+            <a class="game-item" href="https://krunker.io" target="_blank">
+                <img src="krunker.jpg" alt="Krunker.io">
+                <p>Krunker.io</p>
+            </a>
+            <a class="game-item" href="https://www.pacman.com/en/" target="_blank">
+                <img src="pacman.jpg" alt="Pac-Man">
+                <p>Pac-Man</p>
+            </a>
+            <a class="game-item" href="https://agar.io/" target="_blank">
+                <img src="agar.jpg" alt="Agar.io">
+                <p>Agar.io</p>
+            </a>
+            <a class="game-item" href="https://slither.io/" target="_blank">
+                <img src="slither.jpg" alt="Slither.io">
+                <p>Slither.io</p>
+            </a>
+            <a class="game-item" href="https://www.splix.io/" target="_blank">
+                <img src="splix.jpg" alt="Splix.io">
+                <p>Splix.io</p>
+            </a>
+            <a class="game-item" href="https://www.crazygames.com/game/2048" target="_blank">
+                <img src="2048.jpg" alt="2048">
+                <p>2048</p>
+            </a>
+            <a class="game-item" href="https://www.miniclip.com/games/8-ball-pool-multiplayer/en/" target="_blank">
+                <img src="8ballpool.jpg" alt="8 Ball Pool">
+                <p>8 Ball Pool</p>
+            </a>
+            <a class="game-item" href="https://tetris.com/play-tetris" target="_blank">
+                <img src="tetris.jpg" alt="Tetris">
+                <p>Tetris</p>
+            </a>
+            <a class="game-item" href="https://www.chess.com/play/computer" target="_blank">
+                <img src="chess.jpg" alt="Chess">
+                <p>Chess</p>
+            </a>
+            <a class="game-item" href="https://diep.io/" target="_blank">
+                <img src="diep.jpg" alt="Diep.io">
+                <p>Diep.io</p>
+            </a>
+            <a class="game-item" href="https://wings.io/" target="_blank">
+                <img src="wings.jpg" alt="Wings.io">
+                <p>Wings.io</p>
+            </a>
+            <a class="game-item" href="https://surviv.io/" target="_blank">
+                <img src="surviv.jpg" alt="Surviv.io">
+                <p>Surviv.io</p>
+            </a>
+            <a class="game-item" href="https://shellshock.io/" target="_blank">
+                <img src="shellshock.jpg" alt="Shell Shockers">
+                <p>Shell Shockers</p>
+            </a>
+            <a class="game-item" href="https://bonk.io/" target="_blank">
+                <img src="bonk.jpg" alt="Bonk.io">
+                <p>Bonk.io</p>
+            </a>
+            <a class="game-item" href="https://skribbl.io/" target="_blank">
+                <img src="skribbl.jpg" alt="Skribbl.io">
+                <p>Skribbl.io</p>
+            </a>
+            <a class="game-item" href="https://www.mope.io/" target="_blank">
+                <img src="mope.jpg" alt="Mope.io">
+                <p>Mope.io</p>
+            </a>
+            <a class="game-item" href="https://paper-io.com/" target="_blank">
+                <img src="paper.jpg" alt="Paper.io">
+                <p>Paper.io</p>
+            </a>
+            <a class="game-item" href="https://zombsroyale.io/" target="_blank">
+                <img src="zombsroyale.jpg" alt="ZombsRoyale.io">
+                <p>ZombsRoyale.io</p>
+            </a>
+            <a class="game-item" href="https://krunker.io" target="_blank">
+                <img src="krunker.jpg" alt="Krunker.io">
+                <p>Krunker.io</p>
+            </a>
+            <a class="game-item" href="https://www.krew.io/" target="_blank">
+                <img src="krew.jpg" alt="Krew.io">
+                <p>Krew.io</p>
+            </a>
+            <a class="game-item" href="https://www.littlebigsnake.com/" target="_blank">
+                <img src="littlebigsnake.jpg" alt="Little Big Snake">
+                <p>Little Big Snake</p>
+            </a>
+            <a class="game-item" href="https://www.wormax.io/" target="_blank">
+                <img src="wormax.jpg" alt="Wormax.io">
+                <p>Wormax.io</p>
+            </a>
+            <a class="game-item" href="https://www.flyordie.io/" target="_blank">
+                <img src="flyordie.jpg" alt="FlyOrDie.io">
+                <p>FlyOrDie.io</p>
+            </a>
+            <a class="game-item" href="https://gartic.io/" target="_blank">
+                <img src="gartic.jpg" alt="Gartic.io">
+                <p>Gartic.io</p>
+            </a>
+            <a class="game-item" href="https://www.lordz.io/" target="_blank">
+                <img src="lordz.jpg" alt="Lordz.io">
+                <p>Lordz.io</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzTalk</title>
+    <style>
+        /* Estilos generales */
+        /* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    height: 100vh;
+    flex-direction: column; /* Asegura que los elementos hijos se alineen verticalmente */
+}
+
+/* Contenedor principal */
+#chat-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-grow: 1; /* Ocupa el espacio restante del cuerpo */
+}
+
+/* Estilo para la lista de grupos */
+#group-list {
+    width: 200px;
+    background-color: #f2f2f2;
+    border-right: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box; /* Asegura que el padding no incremente el ancho */
+}
+
+#group-list h2 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+}
+
+.join-group {
+    display: block;
+    margin: 5px 0;
+    padding: 10px;
+    background-color: #e1e1e1;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    border-radius: 5px;
+}
+
+/* Estilo para el área del chat */
+#chat-box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border: 1px solid #ccc; /* Añadir borde para mejor visibilidad */
+    box-sizing: border-box;
+}
+
+.message {
+    margin: 5px 0;
+}
+
+.message strong {
+    color: #007bff;
+}
+
+/* Estilo para el menú contextual */
+#context-menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    display: none;
+    z-index: 10;
+    padding: 10px;
+}
+
+#context-menu button {
+    display: block;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    width: 100%;
+    text-align: left;
+}
+
+#context-menu button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Estilos para la lista de usuarios en línea */
+#online-users-list {
+    margin-top: 20px;
+}
+
+.user {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.user:hover {
+    background-color: #f0f0f0;
+}
+
+/* Estilo para la entrada de mensajes */
+#message-form {
+    display: flex;
+    margin-top: 10px;
+    border-top: 1px solid #ccc;
+}
+
+#message-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* Botón de enviar */
+#message-form button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#message-form button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos para los botones de llamadas */
+#call-buttons {
+    margin-top: 10px;
+}
+
+#end-call {
+    display: none;
+}
+
+/* Estilo para la sección de video */
+#local-video-container, #remote-video-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+}
+
+#localVideo, #remoteVideo {
+    width: 100%;
+    height: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Estilo para detectar si está hablando */
+.speaking {
+    border: 2px solid green; /* Cambia el borde a verde si está hablando */
+}
+
+
+    </style>
+    <script src="/socket.io/socket.io.js"></script> <!-- Incluye la biblioteca Socket.io -->
+</head>
+<body>
+    <div id="chat-container">
+        <div id="group-list">
+            <h2>Grupos</h2>
+            <a href="#" class="join-group" data-group="general">General</a>
+            <a href="#" class="join-group" data-group="trabajo">Trabajo</a>
+        </div>
+        <div id="online-users-list"></div>
+        <div id="chat-box"></div>
+        <form id="message-form">
+            <input id="message-input" type="text" placeholder="Escribe tu mensaje..." required />
+            <button type="submit">Enviar</button>
+        </form>
+        <div id="context-menu">
+            <button id="call-audio">📞 Llamada de Audio</button>
+            <button id="call-video">🎥 Videollamada</button>
+            <button id="reply-message">💬 Responder</button>
+            <button id="private-message">✉️ Mensaje Privado</button>
+        </div>
+        <video id="localVideo" autoplay muted></video>
+        <video id="remoteVideo" autoplay></video>
+        <button id="end-call">Finalizar Llamada</button>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+        const chatBox = document.getElementById('chat-box');
+        const groupList = document.getElementById('group-list');
+        const onlineUsersList = document.getElementById('online-users-list');
+        const contextMenu = document.getElementById('context-menu');
+        const websocketUrl = 'wss://tu-servidor-websocket.com'; // Reemplaza con tu URL de WebSocket
+        let currentGroup = 'general'; // Grupo inicial
+        let peerConnection;
+        let localStream;
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let speakingThreshold = 10; // Umbral para detectar si está hablando
+        let websocket; // Variable para el WebSocket
+        let currentUser = 'UsuarioEjemplo'; // Asigna el nombre del usuario logueado
+
+        // Inicializar WebSocket
+        function initWebSocket() {
+            websocket = new WebSocket(websocketUrl);
+
+            websocket.onopen = () => {
+                console.log('Conexión WebSocket establecida');
+            };
+
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'private-message') {
+                    addMessageToChat(data.from, data.message, true);
+                }
+            };
+
+            websocket.onclose = () => {
+                console.log('Conexión WebSocket cerrada');
+            };
+        }
+
+        // Función para enviar un mensaje
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                addMessageToChat('Tú', message);
+                const messageData = {
+                    type: 'group-message', // Enviar como mensaje de grupo
+                    message
+                };
+                websocket.send(JSON.stringify(messageData)); // Enviar mensaje al grupo
+                messageInput.value = '';
+            }
+        });
+
+        // Función para cambiar de grupo
+        groupList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('join-group')) {
+                currentGroup = e.target.getAttribute('data-group');
+                chatBox.innerHTML = `<p>Te has unido al grupo ${currentGroup}</p>`;
+            }
+        });
+
+        // Agrega un mensaje al chat
+        function addMessageToChat(user, message, isPrivate = false) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.innerHTML = `<strong>${isPrivate ? 'Privado' : user}:</strong> ${message}`;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Mostrar el menú contextual al hacer clic derecho sobre un usuario
+        onlineUsersList.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            if (e.target.classList.contains('user')) {
+                const { clientX: mouseX, clientY: mouseY } = e;
+                contextMenu.style.top = `${mouseY}px`;
+                contextMenu.style.left = `${mouseX}px`;
+                contextMenu.style.display = 'flex';
+                contextMenu.setAttribute('data-username', e.target.dataset.username);
+            }
+        });
+
+        // Ocultar el menú contextual al hacer clic en cualquier parte
+        document.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+        });
+
+        // Función para iniciar una llamada de audio
+        document.getElementById('call-audio').addEventListener('click', () => {
+            const username = contextMenu.getAttribute('data-username');
+            startAudioCall(username);
+        });
+
+        // Función para iniciar una videollamada
+        document.getElementById('call-video').addEventListener('click', () => {
+            const username = contextMenu.getAttribute('data-username');
+            startVideoCall(username);
+        });
+
+        // Función para iniciar la llamada usando WebRTC
+        async function startCall(isVideo, username) {
+            peerConnection = new RTCPeerConnection(config);
+
+            try {
+                // Obtener el stream local de la cámara o micrófono
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: isVideo,
+                    audio: true
+                });
+                document.getElementById('localVideo').srcObject = localStream;
+
+                // Agregar tracks al peerConnection
+                localStream.getTracks().forEach((track) => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                // Configurar el intercambio de ICE candidates
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        websocket.send(JSON.stringify({
+                            type: 'new-ice-candidate',
+                            candidate: event.candidate
+                        }));
+                    }
+                };
+
+                // Escuchar cuando se agregue un track remoto
+                peerConnection.ontrack = (event) => {
+                    const [remoteStream] = event.streams;
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                };
+
+                // Crear la oferta de conexión
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+
+                // Enviar la oferta vía WebSocket
+                websocket.send(JSON.stringify({
+                    type: 'video-offer',
+                    offer: peerConnection.localDescription
+                }));
+
+                // Mostrar botón para finalizar llamada
+                document.getElementById('end-call').style.display = 'block';
+            } catch (error) {
+                console.error('Error al iniciar llamada:', error);
+            }
+        }
+
+        // Iniciar llamada de audio
+        function startAudioCall(username) {
+            startCall(false, username);
+        }
+
+        // Iniciar videollamada
+        function startVideoCall(username) {
+            startCall(true, username);
+        }
+
+        // Inicializar WebSocket al cargar la página
+        initWebSocket();
+    });
+    </script>
+</body>
+</html>

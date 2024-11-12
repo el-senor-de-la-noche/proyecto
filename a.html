@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    background: #333;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+
+.chat-container {
+    display: flex;
+    height: calc(100vh - 50px);
+}
+
+.sidebar {
+    width: 200px;
+    background: #fff;
+    border-right: 1px solid #ddd;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.chat-main {
+    flex: 1;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+    background: #eaeaea;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.message-form {
+    display: flex;
+    margin-top: 10px;
+}
+
+.message-form input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.message-form button {
+    padding: 10px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.message {
+    margin: 5px 0;
+}
+
+.call-controls {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.video-container {
+    display: inline-block;
+    border: 2px solid transparent;
+    padding: 5px;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+}
+
+.speaking {
+    border-color: #00ff00; /* Color verde para indicar que está hablando */
+}
+
+.context-menu {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.context-item {
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    text-align: left;
+}
+
+.context-item:hover {
+    background-color: #f0f0f0;
+}
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div id="app">
+        <header class="header">
+            <h1>Global Chat</h1>
+            <button id="logout" class="btn">Cerrar sesión</button>
+        </header>
+        <div class="chat-container">
+            <aside class="sidebar">
+                <h2>Grupos</h2>
+                <ul id="group-list">
+                    <li><button class="join-group btn" data-group="general">General</button></li>
+                    <li><button class="join-group btn" data-group="ayuda">Ayuda</button></li>
+                    <li><button class="join-group btn" data-group="juegos">Juegos</button></li>
+                    <li><button class="join-group btn" data-group="musica">Música</button></li>
+                    <li><button class="join-group btn" data-group="peliculas">Películas</button></li>
+                </ul>
+                <h2>Usuarios en Línea</h2>
+                <ul id="online-users-list">
+                    <li class="user" data-username="Usuario1">Usuario1</li>
+                    <li class="user" data-username="Usuario2">Usuario2</li>
+                </ul>
+            </aside>
+            <main class="chat-main">
+                <div id="chat-box" class="chat-box">
+                    <!-- Mensajes se agregarán aquí dinámicamente -->
+                </div>
+                <form id="message-form" class="message-form">
+                    <input type="text" id="message-input" placeholder="Escribe un mensaje..." autocomplete="off">
+                    <button type="submit" class="btn">Enviar</button>
+                </form>
+            </main>
+        </div>
+        <div class="call-controls">
+            <button id="audio-call" class="btn call-btn" title="Llamada de Audio"><i class="fas fa-phone"></i></button>
+            <button id="video-call" class="btn call-btn" title="Videollamada"><i class="fas fa-video"></i></button>
+            <button id="end-call" class="btn end-call-btn" title="Terminar Llamada" style="display: none;"><i class="fas fa-phone-slash"></i></button>
+        </div>
+        
+        <!-- Contenedores de video para videollamada -->
+        <div id="local-video-container" class="video-container">
+            <video id="localVideo" autoplay playsinline muted></video>
+        </div>
+        <div id="remote-video-container" class="video-container">
+            <video id="remoteVideo" autoplay playsinline></video>
+        </div>
+
+        <!-- Menú contextual -->
+        <div id="context-menu" class="context-menu">
+            <button class="context-item" id="call-audio"><i class="fas fa-phone"></i> Llamada de Audio</button>
+            <button class="context-item" id="call-video"><i class="fas fa-video"></i> Videollamada</button>
+            <button class="context-item" id="reply-message"><i class="fas fa-reply"></i> Responder</button>
+            <button class="context-item" id="private-message"><i class="fas fa-envelope"></i> Mensaje Privado</button>
+        </div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const chatBox = document.getElementById('chat-box');
+    const groupList = document.getElementById('group-list');
+    const onlineUsersList = document.getElementById('online-users-list');
+    const contextMenu = document.getElementById('context-menu');
+    let currentGroup = 'general'; // Grupo inicial
+    let currentChatUser = null; // Usuario con el que se está chateando en privado
+    let chatsPrivados = {}; // Guardar chats privados
+    let chatsGrupales = {}; // Guardar mensajes grupales
+
+    // Función para enviar un mensaje
+    messageForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (message) {
+            if (currentChatUser) {
+                addMessageToChat('Tú', message, currentChatUser, true);
+            } else {
+                addMessageToChat('Tú', message, currentGroup, false);
+            }
+            messageInput.value = '';
+        }
+    });
+
+    // Función para cambiar de grupo
+    groupList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('join-group')) {
+            currentGroup = e.target.getAttribute('data-group');
+            currentChatUser = null; // Desactivar chat privado al unirse a un grupo
+            updateChatBox(currentGroup, false);
+        }
+    });
+
+    // Mostrar el menú contextual al hacer clic derecho sobre un usuario
+    onlineUsersList.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (e.target.classList.contains('user')) {
+            const { clientX: mouseX, clientY: mouseY } = e;
+            contextMenu.style.top = `${mouseX}px`;
+            contextMenu.style.left = `${mouseY}px`;
+            contextMenu.style.display = 'flex';
+            contextMenu.setAttribute('data-username', e.target.dataset.username);
+        }
+    });
+
+    // Ocultar el menú contextual al hacer clic en cualquier parte
+    document.addEventListener('click', () => {
+        contextMenu.style.display = 'none';
+    });
+
+    // Manejadores de eventos del menú contextual
+    contextMenu.addEventListener('click', (e) => {
+        const username = contextMenu.getAttribute('data-username');
+        if (e.target.id === 'private-message') {
+            startPrivateChat(username);
+        }
+    });
+
+    // Iniciar un chat privado con un usuario
+    function startPrivateChat(username) {
+        currentChatUser = username;
+        if (!chatsPrivados[username]) {
+            chatsPrivados[username] = [];
+        }
+        updateChatBox(username, true);
+    }
+
+    // Actualizar el contenido del chat cuando cambias de grupo o de chat privado
+    function updateChatBox(target, isPrivate) {
+        chatBox.innerHTML = '';
+        const chatHistory = isPrivate ? chatsPrivados[target] : chatsGrupales[target];
+        if (chatHistory) {
+            chatHistory.forEach(({ user, message }) => {
+                addMessageToChat(user, message, target, isPrivate, false);
+            });
+        } else {
+            chatBox.innerHTML = `<p>${isPrivate ? 'Iniciando chat privado con ' + target : 'Te has unido al grupo ' + target}</p>`;
+        }
+    }
+
+    // Agrega un mensaje al chat
+    function addMessageToChat(user, message, target, isPrivate, save = true) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.innerHTML = `<strong>${user}:</strong> ${message}`;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        if (save) {
+            if (isPrivate) {
+                if (!chatsPrivados[target]) chatsPrivados[target] = [];
+                chatsPrivados[target].push({ user, message });
+            } else {
+                if (!chatsGrupales[target]) chatsGrupales[target] = [];
+                chatsGrupales[target].push({ user, message });
+            }
+        }
+    }
+});
+
+    </script>
+</body>
+</html>

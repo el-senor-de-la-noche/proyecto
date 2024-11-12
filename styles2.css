@@ -1,0 +1,75 @@
+.group-chats {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #1e1e1e;
+}
+
+.group-chat {
+    flex: 1;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+    border-radius: 8px;
+    background-color: #2e2e2e;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+.group-message-board {
+    max-height: calc(100vh - 130px);
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.group-message-form {
+    border-top: 1px solid #333;
+    padding: 10px;
+    background-color: #1e1e1e;
+}
+
+.group-message-form textarea {
+    width: calc(100% - 120px);
+    height: 50px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background-color: #2e2e2e;
+    color: #e0e0e0;
+}
+
+.group-message-form button {
+    width: 100px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #00e676;
+    color: #121212;
+    cursor: pointer;
+}
+
+.group-message-form button:hover {
+    background-color: #00b248;
+}
+
+.group-message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #333;
+}
+
+.group-message .user-info {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.group-message .message-content {
+    margin-bottom: 5px;
+}
+
+.group-message .message-content small {
+    font-size: 0.8em;
+    color: #888;
+}
